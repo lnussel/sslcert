@@ -1,0 +1,8 @@
+#!/bin/bash
+out="$HOSTNAME.pem"
+echo "generating $out"
+if [ -e "$HOSTNAME.key" ]; then
+	set -- -key "$HOSTNAME.key" "$@"
+	echo "reusing existing $HOSTNAME.key"
+fi
+exec openssl req -config openssl.cnf -new -text -x509 -days ${DAYS:-666} -out $HOSTNAME.pem "$@"

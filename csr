@@ -1,0 +1,8 @@
+#!/bin/bash
+out="$HOSTNAME.req"
+echo "generating $out"
+if [ -e "$HOSTNAME.key" ]; then
+	set -- -key "$HOSTNAME.key" "$@"
+	echo "reusing existing $HOSTNAME.key"
+fi
+exec openssl req -config openssl.cnf -new -text -out "$out" "$@"
