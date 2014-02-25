@@ -1,0 +1,14 @@
+trivial openssl config file that allows you to create certificat
+signing requests or self signed certificates without asking
+questions. By default the certificate uses the value of $HOSTNAME as
+CN and subject alternative name of type DNS. This is all you need
+for host certificates.
+
+to generate self signed certificate (replace 666 with the number of
+days you want the cert to be valid):
+
+$ openssl req -config openssl.cnf -new -text -x509 -days 666 -out $HOSTNAME.pem
+
+to generate a certificate signing request:
+
+$ openssl req -config openssl.cnf -new -text -keyout $HOSTNAME.key -out $HOSTNAME.req

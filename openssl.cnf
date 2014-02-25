@@ -1,0 +1,90 @@
+## generate self signed cert using this file:
+# openssl req -config openssl.cnf -new -text -x509 -days 666 -out $HOSTNAME.pem
+## generate just a request to be signed by some CA:
+# openssl req -config openssl.cnf -new -text -keyout $HOSTNAME.key -out $HOSTNAME.req
+
+# Ideally you don't need to change anything in this file, a
+# certificate will be generated for the value of $HOSTNAME.
+hostname = $ENV::HOSTNAME
+
+# list all entities the certificate is valid for here
+# common types are DNS, IP, URI or email. Separate multiple entries
+# with coma
+subjectAltName = DNS:${hostname}
+
+# example for using server id:
+#subjectAltName=otherName:id-on-dnsSRV;IA5:_mail.1example.com
+
+### normally no need to edit below here
+
+# If the certificate you generate is meant for something else than a
+# server you may need to change extendedKeyUsage
+#
+# serverAuth      = TLS Web Server Authentication
+# clientAuth      = TLS Web Client Authentication
+# codeSigning     = Code Signing
+# emailProtection = E-mail Protection
+extendedKeyUsage = serverAuth
+
+oid_section = new_oids
+
+[ new_oids ]
+id-on-xmppAddr = 1.3.6.1.5.5.7.8.5
+id-on-dnsSRV  = 1.3.6.1.5.5.7.8.7
+# if openssl doesn't support it
+#serverAuth = 1.3.6.1.5.5.7.3.1
+#clientAuth = 1.3.6.1.5.5.7.3.2
+
+[ req ]
+default_bits = 2048
+default_keyfile = privkey.pem
+
+# section that defines components of the DN
+distinguished_name = req_distinguished_name
+
+# The extentions to add when generating a self-signed cert
+x509_extensions	= v3_ca
+
+# The extensions to add when generating a cert sign request
+req_extensions = v3_req
+
+# don't encrypt key
+prompt = no
+encrypt_key = no
+
+# Alterntively, if the above options are yes or commented out set
+# the passwords here or they will be prompted for.
+# input_password = secret
+# output_password = secret
+
+# strings with umlauts must be utf8 encoded
+string_mask = utf8only
+
+[ req_distinguished_name ]
+# using the host name as common name is deprecated. Use
+# subjectAltName instead or at least in addition
+CN = ${hostname}
+# country, organization etc are actually not mandatory
+#C = DE
+#O = foo
+#emailAddress = root@blah
+
+
+# Extensions to add to a certificate request
+[ v3_req ]
+# explicitly flag cert as non-CA
+basicConstraints = CA:FALSE
+
+# should work without
+#keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+extendedKeyUsage = ${extendedKeyUsage}
+subjectAltName = ${subjectAltName}
+
+# The extentions for a CA certificate
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = CA:true
+
+subjectAltName = ${subjectAltName}
