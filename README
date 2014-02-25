@@ -11,4 +11,4 @@ $ openssl req -config openssl.cnf -new -text -x509 -days 666 -out $HOSTNAME.pem
 
 to generate a certificate signing request:
 
-$ openssl req -config openssl.cnf -new -text -keyout $HOSTNAME.key -out $HOSTNAME.req
+$ openssl req -config openssl.cnf -new -text -out $HOSTNAME.req
