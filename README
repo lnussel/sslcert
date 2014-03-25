@@ -7,8 +7,12 @@ for host certificates.
 to generate self signed certificate (replace 666 with the number of
 days you want the cert to be valid):
 
+$ HOSTNAME=foo.example.com DAYS=666 ./selfsigned
+- or -
 $ openssl req -config openssl.cnf -new -text -x509 -days 666 -out $HOSTNAME.pem
 
 to generate a certificate signing request:
 
+$ HOSTNAME=foo.example.com ./csr
+- or -
 $ openssl req -config openssl.cnf -new -text -out $HOSTNAME.req
