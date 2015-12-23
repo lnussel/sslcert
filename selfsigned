@@ -1,8 +1,15 @@
 #!/bin/bash
 out="$HOSTNAME.pem"
-echo "generating $out"
+now="`date +%Y%m%d%H%M%S`"
+if [ "$HOSTNAME" = "${HOSTNAME//.}" ]; then
+	echo "Warning: '$HOSTNAME' doesn't look like a FQDN. You may want to set \$HOSTNAME to some FQDN" 2>&1
+fi
 if [ -e "$HOSTNAME.key" ]; then
 	set -- -key "$HOSTNAME.key" "$@"
 	echo "reusing existing $HOSTNAME.key"
 fi
+if [ -e "$out" ]; then
+	mv "$out" "$out-$now"
+fi
+echo "generating $out"
 exec openssl req -config openssl.cnf -new -text -x509 -days ${DAYS:-666} -out $HOSTNAME.pem "$@"
