@@ -1,0 +1,64 @@
+## generate self signed cert using this file:
+# openssl req -config openssl.cnf-secure_boot-ev -new -text -x509 -days 666 -out $HOSTNAME-sb.pem
+## generate just a request to be signed by some CA:
+# openssl req -config openssl.cnf-secure_boot-ev -new -text -out $HOSTNAME-sb.req
+#
+# some docu here:
+# https://www.openssl.org/docs/manmaster/man5/config.html
+# https://www.openssl.org/docs/manmaster/man5/x509v3_config.html
+# EV Guildelines:
+# https://cabforum.org/extended-validation/
+# https://cabforum.org/ev-certificate-contents/
+#
+# MS policy change:
+# https://techcommunity.microsoft.com/t5/hardware-dev-center/updated-uefi-signing-requirements/ba-p/1062916
+
+HOSTNAME = local
+hostname = $ENV::HOSTNAME
+CN = ${hostname}" secure boot certificate"
+extendedKeyUsage = codeSigning
+default_md = sha256
+
+[ req ]
+default_bits = 4096
+default_keyfile = ${hostname}-sb.key
+
+# section that defines components of the DN
+distinguished_name = req_distinguished_name
+
+# The extentions to add when generating a self-signed cert
+x509_extensions	= v3_ca
+
+# The extensions to add when generating a cert sign request
+req_extensions = v3_req
+
+# don't encrypt key
+prompt = no
+encrypt_key = no
+
+# strings with umlauts must be utf8 encoded
+string_mask = utf8only
+
+[ req_distinguished_name ]
+CN = ${CN}
+
+
+# Extensions to add to a certificate request
+[ v3_req ]
+# should work without
+#keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+extendedKeyUsage = ${extendedKeyUsage}
+
+# The extentions for a CA certificate
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+# MS and Ubuntu have it critical
+basicConstraints = critical,CA:true
+# keyUsage = keyCertSign, cRLSign
+extendedKeyUsage = ${extendedKeyUsage}
+# should be added to certs issued by the root CA
+authorityInfoAccess = caIssuers;URI:https://${hostname}/pki/certs/${hostname}.pem
+#authorityInfoAccess = caIssuers;URI:https://www.opensuse.org/pki/certs/openSUSE_Secure_Boot_CA.pem
+#crlDistributionPoints = URI:http://www.opensuse.org/pki/crl/openSUSE_Secure_Boot_CA.crl
