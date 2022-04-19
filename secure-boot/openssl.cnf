@@ -1,7 +1,7 @@
 ## generate self signed cert using this file:
-# openssl req -config openssl.cnf-secure_boot-ev -new -text -x509 -days 666 -out $HOSTNAME-sb.pem
+# openssl req -config openssl.cnf -new -text -x509 -days 666 -out $HOSTNAME-sb.pem
 ## generate just a request to be signed by some CA:
-# openssl req -config openssl.cnf-secure_boot-ev -new -text -out $HOSTNAME-sb.req
+# openssl req -config openssl.cnf -new -text -out $HOSTNAME-sb.req
 #
 # some docu here:
 # https://www.openssl.org/docs/manmaster/man5/config.html
