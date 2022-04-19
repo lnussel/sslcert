@@ -1,0 +1,34 @@
+#!/bin/bash
+set -xe
+if [ -z "$HOSTNAME" ]; then
+	echo "need HOSTAME set" >&2
+	exit 1
+fi
+if ! type -P sbsiglist > /dev/null; then
+	echo "please install sbsigntools" >&2
+	exit 1
+fi
+if ! type -P openssl > /dev/null; then
+	echo "please install openssl" >&2
+	exit 1
+fi
+[ -e "$HOSTNAME-sb.pem" ] || openssl req -config openssl.cnf -new -text -x509 -days 666 -out "$HOSTNAME-sb.pem"
+[ -e "$HOSTNAME-sb.der" ] || openssl x509 -in "$HOSTNAME-sb.pem" -out "$HOSTNAME-sb.der" -outform der
+read machine_id < /etc/machine-id
+guid="${machine_id:0:8}-${machine_id:8:4}-${machine_id:12:4}-${machine_id:16:4}-${machine_id:20:16}"
+[ -e "$HOSTNAME-sb.der.siglist" ] || sbsiglist --owner $guid --type x509 --output "$HOSTNAME-sb.der.siglist" "$HOSTNAME-sb.der"
+for n in PK KEK db; do
+	[ -e "$HOSTNAME-sb.der.siglist.$n.signed" ] && continue
+        sbvarsign --key "$HOSTNAME-sb.key" --cert "$HOSTNAME-sb.pem" \
+                --output "$HOSTNAME-sb.der.siglist.$n.signed" \
+                "$n" "$HOSTNAME-sb.der.siglist"
+done
+extracerts="4659838C-shim"
+for c in $extracerts; do
+	[ -e /etc/uefi/certs/$c.crt ] || continue
+	[ -e "$c.der.siglist" ] || sbsiglist --owner $guid --type x509 --output "$c.der.siglist" "/etc/uefi/certs/$c.crt"
+	[ -e "$c.der.siglist.db.signed" ] && continue
+        sbvarsign --key "$HOSTNAME-sb.key" --cert "$HOSTNAME-sb.pem" \
+                --output "$c.der.siglist.db.signed" \
+                db "$c.der.siglist"
+done

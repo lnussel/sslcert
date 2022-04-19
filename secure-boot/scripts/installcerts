@@ -1,0 +1,16 @@
+#!/bin/bash
+set -xe
+if [ -z "$HOSTNAME" ]; then
+	echo "need HOSTAME set" >&2
+	exit 1
+fi
+for n in PK KEK db; do
+	mkdir -p "/etc/secureboot/keys/$n"
+	cp -- *.der.siglist.$n.signed "/etc/secureboot/keys/$n"
+done
+sbkeysync --dry-run -v --pk
+cat <<EOF
+please run "sbkeysync -v --pk" to apply
+if it shows an error about db, try
+chattr -i /sys/firmware/efi/efivars/db-d719b2cb-3d3a-4596-a3bc-dad00e67656f
+EOF

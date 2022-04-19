@@ -1,0 +1,7 @@
+`makecerts` can be used to generate a local key and certificate for
+secure boot.
+
+`installcerts` prepares the files for sbkeysync to enroll.
+
+You can use sbsign to to add signatures to efi binaries then:
+`sbsign --key $HOSTNAME-sb.key --cert $HOSTNAME-sb.pem --output signed.efi unsigned.efi`
